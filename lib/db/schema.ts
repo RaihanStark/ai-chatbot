@@ -165,3 +165,27 @@ export const stream = pgTable(
 );
 
 export type Stream = InferSelectModel<typeof stream>;
+
+export const employee = pgTable('Employee', {
+  id: uuid('id').primaryKey().notNull().defaultRandom(),
+  firstName: varchar('firstName', { length: 100 }).notNull(),
+  lastName: varchar('lastName', { length: 100 }).notNull(),
+  email: varchar('email', { length: 255 }).notNull().unique(),
+  phone: varchar('phone', { length: 20 }).notNull(),
+  position: varchar('position', { 
+    enum: ['manager', 'chef', 'sous-chef', 'line-cook', 'server', 'bartender', 'host', 'busser', 'dishwasher'] 
+  }).notNull(),
+  department: varchar('department', { 
+    enum: ['kitchen', 'front-of-house', 'bar', 'management'] 
+  }).notNull(),
+  hireDate: timestamp('hireDate').notNull(),
+  salary: varchar('salary', { length: 20 }).notNull(),
+  status: varchar('status', { enum: ['active', 'inactive', 'on-leave'] }).notNull().default('active'),
+  address: text('address'),
+  emergencyContact: varchar('emergencyContact', { length: 255 }),
+  emergencyPhone: varchar('emergencyPhone', { length: 20 }),
+  createdAt: timestamp('createdAt').notNull().defaultNow(),
+  updatedAt: timestamp('updatedAt').notNull().defaultNow(),
+});
+
+export type Employee = InferSelectModel<typeof employee>;

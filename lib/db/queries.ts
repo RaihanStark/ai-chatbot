@@ -27,6 +27,8 @@ import {
   type DBMessage,
   type Chat,
   stream,
+  employee,
+  type Employee,
 } from './schema';
 import type { ArtifactKind } from '@/components/artifact';
 import { generateUUID } from '../utils';
