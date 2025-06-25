@@ -35,6 +35,19 @@ Do not update document right after creating it. Wait for user feedback or reques
 export const regularPrompt =
   'You are a friendly assistant! Keep your responses concise and helpful.';
 
+export const employeeDatabasePrompt = `
+When using the queryEmployees tool to query the employee database:
+- The table name is "Employee" (with capital E, case-sensitive)
+- Common queries examples:
+  - SELECT * FROM "Employee" WHERE department = 'kitchen'
+  - SELECT firstName, lastName, position FROM "Employee" WHERE status = 'active'
+  - SELECT COUNT(*) FROM "Employee" GROUP BY department
+- Available columns: id, firstName, lastName, email, phone, position, department, hireDate, salary, status, address, emergencyContact, emergencyPhone, createdAt, updatedAt
+- Positions: manager, chef, sous-chef, line-cook, server, bartender, host, busser, dishwasher
+- Departments: kitchen, front-of-house, bar, management
+- Status values: active, inactive, on-leave
+`;
+
 export interface RequestHints {
   latitude: Geo['latitude'];
   longitude: Geo['longitude'];
@@ -58,7 +71,7 @@ export const systemPrompt = ({
   requestHints: RequestHints;
 }) => {
   const requestPrompt = getRequestPromptFromHints(requestHints);
-  return `${regularPrompt}\n\n${requestPrompt}\n\n${artifactsPrompt}`;
+  return `${regularPrompt}\n\n${requestPrompt}\n\n${artifactsPrompt}\n\n${employeeDatabasePrompt}`;
 };
 
 export const codePrompt = `
