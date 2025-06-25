@@ -5,7 +5,6 @@ import { useChat } from '@ai-sdk/react';
 import { useEffect, useState } from 'react';
 import useSWR, { useSWRConfig } from 'swr';
 import { ChatHeader } from '@/components/chat-header';
-import type { Vote } from '@/lib/db/schema';
 import { fetcher, fetchWithErrorHandlers, generateUUID } from '@/lib/utils';
 import { Artifact } from './artifact';
 import { MultimodalInput } from './multimodal-input';
@@ -91,10 +90,6 @@ export function Chat({
     }
   }, [query, append, hasAppendedQuery, id]);
 
-  const { data: votes } = useSWR<Array<Vote>>(
-    messages.length >= 2 ? `/api/vote?chatId=${id}` : null,
-    fetcher,
-  );
 
   const [attachments, setAttachments] = useState<Array<Attachment>>([]);
   const isArtifactVisible = useArtifactSelector((state) => state.isVisible);
@@ -120,7 +115,6 @@ export function Chat({
         <Messages
           chatId={id}
           status={status}
-          votes={votes}
           messages={messages}
           setMessages={setMessages}
           reload={reload}
@@ -160,7 +154,6 @@ export function Chat({
         messages={messages}
         setMessages={setMessages}
         reload={reload}
-        votes={votes}
         isReadonly={isReadonly}
       />
     </>
