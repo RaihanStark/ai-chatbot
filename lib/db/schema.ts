@@ -229,10 +229,14 @@ export const inventoryCategory = pgTable('InventoryCategory', {
   id: uuid('id').primaryKey().notNull().defaultRandom(),
   name: varchar('name', { length: 100 }).notNull(),
   description: text('description'),
-  parentCategoryId: uuid('parentCategoryId')
-    .references(() => inventoryCategory.id),
+  parentCategoryId: uuid('parentCategoryId'),
   createdAt: timestamp('createdAt').notNull().defaultNow(),
-});
+}, (table) => ({
+  parentReference: foreignKey({
+    columns: [table.parentCategoryId],
+    foreignColumns: [table.id],
+  }),
+}));
 
 export type InventoryCategory = InferSelectModel<typeof inventoryCategory>;
 
