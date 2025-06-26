@@ -9,8 +9,12 @@ const createConnection = () => {
   if (!process.env.POSTGRES_URL) {
     throw new Error('POSTGRES_URL is not configured');
   }
-  const client = postgres(process.env.POSTGRES_URL);
-  return drizzle(client);
+  try {
+    const client = postgres(process.env.POSTGRES_URL);
+    return drizzle(client);
+  } catch (error) {
+    throw new Error(`Database connection failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
 };
 
 export const executeSqlQuery = tool({
@@ -54,13 +58,16 @@ export const executeSqlQuery = tool({
       // Execute the query
       const result = await db.execute(sql.raw(query));
       
-      // Format the results in a readable way
-      if (result.length === 0) {
+      // Drizzle execute returns an array directly
+      if (!Array.isArray(result) || result.length === 0) {
         return 'No records found matching your query.';
       }
       
       return result;
     } catch (error) {
+      console.error('SQL Query Error:', error);
+      console.error('Query that failed:', query);
+      
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Failed to execute query',
