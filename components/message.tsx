@@ -20,6 +20,37 @@ import { DocumentPreview } from './document-preview';
 import { MessageReasoning } from './message-reasoning';
 import type { UseChatHelpers } from '@ai-sdk/react';
 
+const getToolDisplayMessage = (toolName: string, state: 'call' | 'result') => {
+  const messages: Record<string, { call: string; result: string }> = {
+    executeSqlQuery: {
+      call: 'Searching database...',
+      result: 'Processing data...'
+    },
+    createChart: {
+      call: 'Creating visualization...',
+      result: 'Chart ready'
+    },
+    getWeather: {
+      call: 'Fetching weather data...',
+      result: 'Weather data retrieved'
+    },
+    createDocument: {
+      call: 'Creating document...',
+      result: 'Document created'
+    },
+    updateDocument: {
+      call: 'Updating document...',
+      result: 'Document updated'
+    },
+    requestSuggestions: {
+      call: 'Generating suggestions...',
+      result: 'Suggestions ready'
+    }
+  };
+
+  return messages[toolName]?.[state] || null;
+};
+
 const PurePreviewMessage = ({
   chatId,
   message,
@@ -157,12 +188,13 @@ const PurePreviewMessage = ({
 
                 if (state === 'call') {
                   const { args } = toolInvocation;
+                  const displayMessage = getToolDisplayMessage(toolName, 'call');
 
                   return (
                     <div
                       key={toolCallId}
                       className={cx({
-                        skeleton: ['getWeather', 'createChart'].includes(toolName),
+                        skeleton: ['getWeather', 'createChart', 'executeSqlQuery'].includes(toolName),
                       })}
                     >
                       {toolName === 'getWeather' ? (
@@ -183,6 +215,11 @@ const PurePreviewMessage = ({
                           args={args}
                           isReadonly={isReadonly}
                         />
+                      ) : toolName === 'executeSqlQuery' && displayMessage ? (
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground p-3 rounded-lg bg-muted/50">
+                          <div className="animate-spin h-4 w-4 border-2 border-primary border-t-transparent rounded-full" />
+                          <span>{displayMessage}</span>
+                        </div>
                       ) : null}
                     </div>
                   );
@@ -190,6 +227,19 @@ const PurePreviewMessage = ({
 
                 if (state === 'result') {
                   const { result } = toolInvocation;
+                  const displayMessage = getToolDisplayMessage(toolName, 'result');
+
+                  // For executeSqlQuery, show a brief "processing" message
+                  if (toolName === 'executeSqlQuery' && displayMessage) {
+                    return (
+                      <div key={toolCallId} className="flex items-center gap-2 text-sm text-muted-foreground p-3 rounded-lg bg-muted/50">
+                        <svg className="h-4 w-4 text-green-500" fill="none" strokeWidth="2" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                        </svg>
+                        <span>{displayMessage}</span>
+                      </div>
+                    );
+                  }
 
                   return (
                     <div key={toolCallId}>
@@ -215,7 +265,7 @@ const PurePreviewMessage = ({
                           isReadonly={isReadonly}
                         />
                       ) : toolName === 'executeSqlQuery' ? (
-                        null // Hide raw SQL query results - AI will process and present it
+                        null // Raw results hidden - shown as "Processing data..." above
                       ) : (
                         <pre>{JSON.stringify(result, null, 2)}</pre>
                       )}
