@@ -48,27 +48,36 @@ Example usage:
 createChart({
   type: "bar",
   title: "Sales by Month",
-  data: [
+  data: [  // REQUIRED - array of data objects
     { name: "Jan", value: 4000 },
     { name: "Feb", value: 3000 },
     { name: "Mar", value: 5000 }
   ],
-  dataKeys: ["value"],
-  xAxisKey: "name",
-  colors: ["#0088FE", "#00C49F", "#FFBB28"]
+  dataKeys: ["value"],  // REQUIRED - which keys to plot
+  xAxisKey: "name",     // OPTIONAL - defaults to "name"
+  colors: ["#0088FE"]   // OPTIONAL - has defaults
 })
 
+CRITICAL: The 'data' parameter is REQUIRED and must be an array of objects.
+
 For database charts (e.g., employee salaries):
-1. Query data with executeSqlQuery: SELECT department, salary FROM "Employee"
-2. Process string fields like salary to numbers:
-   - Remove $ and commas: salary.replace(/[$,]/g, '')
-   - Convert to number: parseFloat(cleanedSalary)
-   - Group and calculate aggregations
-3. Format the data for the chart:
-   - data: [{ name: "category1", value: number1 }, ...]
-   - dataKeys: ["value"]
-   - xAxisKey: "name"
-4. Use createChart with the processed data
+1. Query data with executeSqlQuery: SELECT columns FROM "Employee"
+2. Process the data:
+   - For salary: remove $ and commas, convert to number
+   - For dates: calculate differences (e.g., years of experience)
+3. Format for the chart type:
+   - Bar/Pie: data: [{ name: "label", value: number }, ...]
+   - Scatter: data: [{ experience: 5.2, salary: 45000 }, ...]
+4. Call createChart with ALL required parameters:
+   createChart({
+     type: "scatter",
+     title: "Your Title",
+     data: processedDataArray,  // MUST be an array
+     dataKeys: ["salary"],       // y-axis key for scatter
+     xAxisKey: "experience"      // x-axis key
+   })
+
+NEVER call createChart without the data parameter!
 
 IMPORTANT: Charts appear inline in the chat, not as documents.
 `;
@@ -105,6 +114,12 @@ IMPORTANT NOTES:
 - Table names are case-sensitive (e.g., "Employee" not "employee")
 - Always use double quotes for table names with capital letters
 - NEVER show raw JSON query results to users - always process and present data properly
+
+CALCULATING EXPERIENCE:
+To calculate years of experience from hireDate:
+const currentDate = new Date();
+const hireDate = new Date(employee.hireDate);
+const yearsExperience = (currentDate - hireDate) / (1000 * 60 * 60 * 24 * 365.25);
 `;
 
 export interface RequestHints {
