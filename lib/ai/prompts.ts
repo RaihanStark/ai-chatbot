@@ -46,6 +46,9 @@ When using the queryEmployees tool to query the employee database:
 - Positions: manager, chef, sous-chef, line-cook, server, bartender, host, busser, dishwasher
 - Departments: kitchen, front-of-house, bar, management
 - Status values: active, inactive, on-leave
+
+
+Some data in the field may need to be formatted. For example, the salary field is in dollars, but the user may want to see it in euros. In this case, you can use the formatCurrency tool to format the salary field.
 `;
 
 export interface RequestHints {
