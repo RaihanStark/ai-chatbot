@@ -14,7 +14,6 @@ const createConnection = () => {
 };
 
 export const queryEmployees = tool({
-  displayName: 'Query Employees Database',
   description: 'Execute SELECT queries on the Employee table to retrieve employee information. Note: The table name is "Employee" with capital E.',
   parameters: z.object({
     query: z.string().describe('The SELECT SQL query to execute on the Employee table. Table name must be "Employee" (case-sensitive).'),
