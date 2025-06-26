@@ -35,6 +35,44 @@ Do not update document right after creating it. Wait for user feedback or reques
 export const regularPrompt =
   'You are a friendly assistant! Keep your responses concise and helpful.';
 
+export const chartPrompt = `
+When asked to create charts or data visualizations, use the createChart tool (NOT createDocument).
+The createChart tool renders charts directly in the chat, similar to how weather information is displayed.
+
+Use createChart for:
+- Bar charts, line charts, pie charts, area charts, radar charts, scatter plots
+- Any data visualization request
+- Quick data analysis and display
+
+Example usage:
+createChart({
+  type: "bar",
+  title: "Sales by Month",
+  data: [
+    { name: "Jan", value: 4000 },
+    { name: "Feb", value: 3000 },
+    { name: "Mar", value: 5000 }
+  ],
+  dataKeys: ["value"],
+  xAxisKey: "name",
+  colors: ["#0088FE", "#00C49F", "#FFBB28"]
+})
+
+For employee salary charts:
+1. Query data with queryEmployees: SELECT department, salary FROM "Employee"
+2. Process the salary strings to numbers:
+   - Remove $ and commas: salary.replace(/[$,]/g, '')
+   - Convert to number: parseFloat(cleanedSalary)
+   - Group by department and calculate averages
+3. Format the data for the chart:
+   - data: [{ name: "department1", value: avgSalary1 }, ...]
+   - dataKeys: ["value"]
+   - xAxisKey: "name"
+4. Use createChart with the processed data
+
+IMPORTANT: Charts appear inline in the chat, not as documents.
+`;
+
 export const employeeDatabasePrompt = `
 When using the queryEmployees tool to query the employee database:
 - The table name is "Employee" (with capital E, case-sensitive)
@@ -47,8 +85,16 @@ When using the queryEmployees tool to query the employee database:
 - Departments: kitchen, front-of-house, bar, management
 - Status values: active, inactive, on-leave
 
+IMPORTANT: The salary field is stored as a string with $ symbol and commas (e.g., "$75,000").
+- You CANNOT use SQL aggregate functions like AVG() or SUM() on the salary field
+- To calculate averages or totals, first query the raw data, then process it in your code
+- When creating charts with salary data:
+  1. Query: SELECT department, salary FROM "Employee"
+  2. Parse the salary strings to numbers (remove $ and commas)
+  3. Calculate averages or totals programmatically
+  4. Use createChart with the processed data
 
-Some data in the field may need to be formatted. For example, the salary field is in dollars, but the user may want to see it in euros. In this case, you can use the formatCurrency tool to format the salary field.
+NEVER show the raw JSON query results to users. Process the data and present it in a chart or summary.
 `;
 
 export interface RequestHints {
@@ -74,7 +120,7 @@ export const systemPrompt = ({
   requestHints: RequestHints;
 }) => {
   const requestPrompt = getRequestPromptFromHints(requestHints);
-  return `${regularPrompt}\n\n${requestPrompt}\n\n${artifactsPrompt}\n\n${employeeDatabasePrompt}`;
+  return `${regularPrompt}\n\n${requestPrompt}\n\n${artifactsPrompt}\n\n${employeeDatabasePrompt}\n\n${chartPrompt}`;
 };
 
 export const codePrompt = `
