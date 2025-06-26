@@ -58,14 +58,14 @@ createChart({
   colors: ["#0088FE", "#00C49F", "#FFBB28"]
 })
 
-For employee salary charts:
-1. Query data with queryEmployees: SELECT department, salary FROM "Employee"
-2. Process the salary strings to numbers:
+For database charts (e.g., employee salaries):
+1. Query data with executeSqlQuery: SELECT department, salary FROM "Employee"
+2. Process string fields like salary to numbers:
    - Remove $ and commas: salary.replace(/[$,]/g, '')
    - Convert to number: parseFloat(cleanedSalary)
-   - Group by department and calculate averages
+   - Group and calculate aggregations
 3. Format the data for the chart:
-   - data: [{ name: "department1", value: avgSalary1 }, ...]
+   - data: [{ name: "category1", value: number1 }, ...]
    - dataKeys: ["value"]
    - xAxisKey: "name"
 4. Use createChart with the processed data
@@ -73,28 +73,38 @@ For employee salary charts:
 IMPORTANT: Charts appear inline in the chat, not as documents.
 `;
 
-export const employeeDatabasePrompt = `
-When using the queryEmployees tool to query the employee database:
-- The table name is "Employee" (with capital E, case-sensitive)
-- Common queries examples:
-  - SELECT * FROM "Employee" WHERE department = 'kitchen'
-  - SELECT firstName, lastName, position FROM "Employee" WHERE status = 'active'
-  - SELECT COUNT(*) FROM "Employee" GROUP BY department
-- Available columns: id, firstName, lastName, email, phone, position, department, hireDate, salary, status, address, emergencyContact, emergencyPhone, createdAt, updatedAt
-- Positions: manager, chef, sous-chef, line-cook, server, bartender, host, busser, dishwasher
-- Departments: kitchen, front-of-house, bar, management
-- Status values: active, inactive, on-leave
+export const databasePrompt = `
+DATABASE ACCESS RULES:
+- You have VIEW permissions only (SELECT queries only)
+- Use the executeSqlQuery tool to query the database
+- You can ONLY access tables that are explicitly provided in the database schema below
+- NEVER attempt to query tables not listed in the schema
 
-IMPORTANT: The salary field is stored as a string with $ symbol and commas (e.g., "$75,000").
-- You CANNOT use SQL aggregate functions like AVG() or SUM() on the salary field
-- To calculate averages or totals, first query the raw data, then process it in your code
-- When creating charts with salary data:
-  1. Query: SELECT department, salary FROM "Employee"
-  2. Parse the salary strings to numbers (remove $ and commas)
-  3. Calculate averages or totals programmatically
-  4. Use createChart with the processed data
+DATABASE SCHEMA:
 
-NEVER show the raw JSON query results to users. Process the data and present it in a chart or summary.
+Table: Employee
+- id: uuid (primary key)
+- firstName: varchar(100)
+- lastName: varchar(100)
+- email: varchar(255) unique
+- phone: varchar(20)
+- position: enum ['manager', 'chef', 'sous-chef', 'line-cook', 'server', 'bartender', 'host', 'busser', 'dishwasher']
+- department: enum ['kitchen', 'front-of-house', 'bar', 'management']
+- hireDate: timestamp
+- salary: varchar(20) - IMPORTANT: Stored as string with $ and commas (e.g., "$75,000")
+- status: enum ['active', 'inactive', 'on-leave'] default 'active'
+- address: text
+- emergencyContact: varchar(255)
+- emergencyPhone: varchar(20)
+- createdAt: timestamp
+- updatedAt: timestamp
+
+IMPORTANT NOTES:
+- The Employee salary field is a string - you CANNOT use SQL functions like AVG() or SUM() on it
+- To work with salaries, query the raw data and process it in your code
+- Table names are case-sensitive (e.g., "Employee" not "employee")
+- Always use double quotes for table names with capital letters
+- NEVER show raw JSON query results to users - always process and present data properly
 `;
 
 export interface RequestHints {
@@ -120,7 +130,7 @@ export const systemPrompt = ({
   requestHints: RequestHints;
 }) => {
   const requestPrompt = getRequestPromptFromHints(requestHints);
-  return `${regularPrompt}\n\n${requestPrompt}\n\n${artifactsPrompt}\n\n${employeeDatabasePrompt}\n\n${chartPrompt}`;
+  return `${regularPrompt}\n\n${requestPrompt}\n\n${artifactsPrompt}\n\n${databasePrompt}\n\n${chartPrompt}`;
 };
 
 export const codePrompt = `

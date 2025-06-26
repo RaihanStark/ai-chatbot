@@ -3,6 +3,6 @@ import { openai } from '@ai-sdk/openai';
 
 export const myProvider = customProvider({
   languageModels: {
-    'chat-model': openai('gpt-4o-mini'),
+    'chat-model': openai('gpt-4o'),
   },
 });

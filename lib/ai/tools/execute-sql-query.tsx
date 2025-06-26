@@ -13,10 +13,10 @@ const createConnection = () => {
   return drizzle(client);
 };
 
-export const queryEmployees = tool({
-  description: 'Execute SELECT queries on the Employee table to retrieve employee information. Note: The table name is "Employee" with capital E.',
+export const executeSqlQuery = tool({
+  description: 'Execute SELECT queries on the database. You have VIEW permissions only. Database schema must be provided in the prompt for access.',
   parameters: z.object({
-    query: z.string().describe('The SELECT SQL query to execute on the Employee table. Table name must be "Employee" (case-sensitive).'),
+    query: z.string().describe('The SELECT SQL query to execute. Only SELECT queries are allowed (VIEW permissions).'),
   }),
   execute: async ({ query }) => {
     // Security check: Only allow SELECT queries
@@ -56,7 +56,7 @@ export const queryEmployees = tool({
       
       // Format the results in a readable way
       if (result.length === 0) {
-        return 'No employees found matching your query.';
+        return 'No records found matching your query.';
       }
       
       return result;
@@ -69,13 +69,3 @@ export const queryEmployees = tool({
   },
 });
 
-// Helper function to generate example queries
-export const employeeQueryExamples = [
-  "SELECT * FROM \"Employee\" WHERE department = 'kitchen'",
-  "SELECT firstName, lastName, position, salary FROM \"Employee\" WHERE status = 'active'",
-  "SELECT COUNT(*) as total_employees FROM \"Employee\"",
-  "SELECT department, COUNT(*) as count FROM \"Employee\" GROUP BY department",
-  "SELECT * FROM \"Employee\" WHERE position = 'chef' OR position = 'sous-chef'",
-  "SELECT firstName, lastName, hireDate FROM \"Employee\" ORDER BY hireDate DESC LIMIT 5",
-  "SELECT AVG(CAST(REPLACE(REPLACE(salary, '$', ''), ',', '') AS INTEGER)) as avg_salary FROM \"Employee\" WHERE department = 'kitchen'",
-];

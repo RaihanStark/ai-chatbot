@@ -214,8 +214,8 @@ const PurePreviewMessage = ({
                           result={result}
                           isReadonly={isReadonly}
                         />
-                      ) : toolName === 'queryEmployees' ? (
-                        null // Hide raw employee data - AI will process and present it
+                      ) : toolName === 'executeSqlQuery' ? (
+                        null // Hide raw SQL query results - AI will process and present it
                       ) : (
                         <pre>{JSON.stringify(result, null, 2)}</pre>
                       )}
