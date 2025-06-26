@@ -2,7 +2,6 @@ import { tool } from 'ai';
 import { z } from 'zod';
 
 export const createChart = tool({
-  displayName: 'Create Chart',
   description: 'Create a data visualization chart directly in the chat (not as a document). Use this for quick data visualizations.',
   parameters: z.object({
     type: z.enum(['line', 'bar', 'pie', 'area', 'radar', 'scatter']).describe('The type of chart to create'),
