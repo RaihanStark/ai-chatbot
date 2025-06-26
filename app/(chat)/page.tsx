@@ -43,7 +43,6 @@ export default async function Page() {
         id={id}
         initialMessages={[]}
         initialChatModel={modelIdFromCookie.value}
-        initialVisibilityType="private"
         isReadonly={false}
         session={session}
         autoResume={false}
