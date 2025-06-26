@@ -200,6 +200,7 @@ export async function getChatById({ id }: { id: string }) {
     const [selectedChat] = await db.select().from(chat).where(eq(chat.id, id));
     return selectedChat;
   } catch (error) {
+    console.error('Error in getChatById:', error);
     throw new ChatSDKError('bad_request:database', 'Failed to get chat by id');
   }
 }

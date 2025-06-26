@@ -16,24 +16,24 @@ function PureSuggestedActions({
 }: SuggestedActionsProps) {
   const suggestedActions = [
     {
-      title: 'What are the advantages',
-      label: 'of using Next.js?',
-      action: 'What are the advantages of using Next.js?',
+      title: 'Create a bar chart showing',
+      label: 'employee count by department',
+      action: 'Create a bar chart showing the number of employees in each department (kitchen, front-of-house, bar, management) from the employee database.',
     },
     {
-      title: 'Write code to',
-      label: `demonstrate djikstra's algorithm`,
-      action: `Write code to demonstrate djikstra's algorithm`,
+      title: 'Plot a pie chart of',
+      label: 'salary distribution by position',
+      action: 'Create a pie chart showing the salary distribution across different employee positions (manager, chef, sous-chef, line-cook, server, bartender, host, busser, dishwasher).',
     },
     {
-      title: 'Help me write an essay',
-      label: `about silicon valley`,
-      action: `Help me write an essay about silicon valley`,
+      title: 'Generate a line chart for',
+      label: 'hiring trends over time',
+      action: 'Create a line chart showing the hiring trends over time by plotting the number of employees hired each year from the hireDate field.',
     },
     {
-      title: 'What is the weather',
-      label: 'in San Francisco?',
-      action: 'What is the weather in San Francisco?',
+      title: 'Make a scatter plot of',
+      label: 'salary vs experience',
+      action: 'Create a scatter plot showing the relationship between employee salaries and their experience (calculated from hireDate) to see if there\'s a correlation.',
     },
   ];
 
