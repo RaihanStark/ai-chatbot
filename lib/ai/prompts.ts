@@ -88,6 +88,11 @@ DATABASE ACCESS RULES:
 - Use the executeSqlQuery tool to query the database
 - You can ONLY access tables that are explicitly provided in the database schema below
 - NEVER attempt to query tables not listed in the schema
+- always use the exact case of the table and column names as shown in the schema below !IMPORTANT EXACT CASE!
+- Always use double quotes for table names with capital letters !IMPORTANT!
+
+Example:
+SELECT "firstName", "lastName", salary, "hireDate" FROM "Employee" WHERE status = 'active'
 
 DATABASE SCHEMA:
 
