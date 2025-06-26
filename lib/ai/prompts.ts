@@ -111,9 +111,18 @@ Table: Employee
 IMPORTANT NOTES:
 - The Employee salary field is a string - you CANNOT use SQL functions like AVG() or SUM() on it
 - To work with salaries, query the raw data and process it in your code
-- Table names are case-sensitive (e.g., "Employee" not "employee")
-- Always use double quotes for table names with capital letters
+- Table AND column names are case-sensitive in PostgreSQL:
+  - Table: "Employee" (not "employee")
+  - Columns: firstName, lastName, hireDate (not firstname, lastname, hiredate)
+  - Always use the EXACT case as shown in the schema above
+- When querying, use double quotes for table names: SELECT * FROM "Employee"
+- Column names don't need quotes unless they contain special characters
 - NEVER show raw JSON query results to users - always process and present data properly
+
+EXAMPLE QUERIES (note the exact case):
+- SELECT firstName, lastName, salary, hireDate FROM "Employee"
+- SELECT * FROM "Employee" WHERE department = 'kitchen'
+- SELECT firstName, lastName, position FROM "Employee" WHERE status = 'active'
 
 CALCULATING EXPERIENCE:
 To calculate years of experience from hireDate:
