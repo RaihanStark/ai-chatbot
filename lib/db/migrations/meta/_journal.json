@@ -57,6 +57,13 @@
       "when": 1750837978074,
       "tag": "0007_yielding_mojo",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1750838000000,
+      "tag": "0008_add_fnb_tables",
+      "breakpoints": true
     }
   ]
 }

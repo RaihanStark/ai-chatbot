@@ -34,20 +34,53 @@ export const executeSqlQuery = tool({
       };
     }
     
-    // Additional security checks for dangerous keywords
-    const dangerousKeywords = [
-      'insert', 'update', 'delete', 'drop', 'create', 'alter', 'truncate',
-      'grant', 'revoke', 'exec', 'execute', 'call', 'merge', 'replace',
-      'copy', 'import', 'load', ';select', '; select', '\\n', '\\r'
+    // Additional security checks for dangerous SQL statements
+    // Check for dangerous patterns that indicate non-SELECT operations
+    const dangerousPatterns = [
+      /;\s*insert/i,
+      /;\s*update/i,
+      /;\s*delete/i,
+      /;\s*drop/i,
+      /;\s*create/i,
+      /;\s*alter/i,
+      /;\s*truncate/i,
+      /;\s*grant/i,
+      /;\s*revoke/i,
+      /^\s*insert/i,
+      /^\s*update/i,
+      /^\s*delete/i,
+      /^\s*drop/i,
+      /^\s*create/i,
+      /^\s*alter/i,
+      /^\s*truncate/i,
+      /^\s*grant/i,
+      /^\s*revoke/i,
+      /^\s*exec/i,
+      /^\s*execute/i,
+      /^\s*call/i,
+      /^\s*merge/i,
+      /^\s*replace/i,
+      /^\s*copy/i,
+      /^\s*import/i,
+      /^\s*load/i
     ];
     
-    const hasDangerousKeyword = dangerousKeywords.some(keyword => 
-      normalizedQuery.includes(keyword)
+    const hasDangerousPattern = dangerousPatterns.some(pattern => 
+      pattern.test(query)
     );
     
-    if (hasDangerousKeyword) {
+    if (hasDangerousPattern) {
       return {
         error: 'Query contains restricted keywords. Only SELECT queries are allowed.',
+        success: false,
+      };
+    }
+    
+    // Check for multiple statements (semicolon not in quotes)
+    const semicolonOutsideQuotes = /;(?=(?:[^']*'[^']*')*[^']*$)/;
+    if (semicolonOutsideQuotes.test(query.trim().slice(0, -1))) {
+      return {
+        error: 'Multiple statements are not allowed. Only single SELECT queries are permitted.',
         success: false,
       };
     }

@@ -16,7 +16,8 @@
     "db:pull": "drizzle-kit pull",
     "db:check": "drizzle-kit check",
     "db:up": "drizzle-kit up",
-    "db:seed:employees": "tsx lib/db/seed-employees.ts"
+    "db:seed:employees": "tsx lib/db/seed-employees.ts",
+    "db:seed:fnb": "tsx lib/db/seed-fnb.ts"
   },
   "dependencies": {
     "@ai-sdk/openai": "^1.3.22",

@@ -113,6 +113,118 @@ Table: Employee
 - createdAt: timestamp
 - updatedAt: timestamp
 
+Table: Shift
+- id: uuid (primary key)
+- name: varchar(100) - e.g., "Morning Shift", "Evening Shift"
+- startTime: varchar(10) - e.g., "09:00"
+- endTime: varchar(10) - e.g., "17:00"
+- date: timestamp
+- status: enum ['scheduled', 'in-progress', 'completed', 'cancelled'] default 'scheduled'
+- notes: text
+- createdAt: timestamp
+- updatedAt: timestamp
+
+Table: ShiftAssignment
+- id: uuid (primary key)
+- shiftId: uuid (foreign key to Shift)
+- employeeId: uuid (foreign key to Employee)
+- role: varchar(100) - Role for this shift (might differ from regular position)
+- checkInTime: timestamp
+- checkOutTime: timestamp
+- breakMinutes: integer default 0
+- status: enum ['scheduled', 'confirmed', 'checked-in', 'checked-out', 'no-show', 'cancelled'] default 'scheduled'
+- notes: text
+- createdAt: timestamp
+- updatedAt: timestamp
+
+Table: ShiftSwapRequest
+- id: uuid (primary key)
+- requestingEmployeeId: uuid (foreign key to Employee)
+- targetEmployeeId: uuid (foreign key to Employee, nullable)
+- shiftAssignmentId: uuid (foreign key to ShiftAssignment)
+- reason: text
+- status: enum ['pending', 'approved', 'rejected', 'cancelled'] default 'pending'
+- approvedBy: uuid (foreign key to Employee, nullable)
+- approvedAt: timestamp
+- createdAt: timestamp
+
+Table: Supplier
+- id: uuid (primary key)
+- name: varchar(200)
+- contactPerson: varchar(100)
+- email: varchar(255)
+- phone: varchar(20)
+- address: text
+- paymentTerms: varchar(100) - e.g., "Net 30", "COD"
+- status: enum ['active', 'inactive', 'suspended'] default 'active'
+- notes: text
+- createdAt: timestamp
+- updatedAt: timestamp
+
+Table: InventoryCategory
+- id: uuid (primary key)
+- name: varchar(100)
+- description: text
+- parentCategoryId: uuid (self-referencing foreign key, nullable)
+- createdAt: timestamp
+
+Table: InventoryItem
+- id: uuid (primary key)
+- name: varchar(200)
+- description: text
+- sku: varchar(100) unique
+- categoryId: uuid (foreign key to InventoryCategory)
+- unit: varchar(50) - e.g., "kg", "lbs", "bottles", "cases"
+- unitCost: numeric(10, 2)
+- supplierId: uuid (foreign key to Supplier)
+- minimumStock: numeric(10, 2) default 0
+- maximumStock: numeric(10, 2)
+- currentStock: numeric(10, 2) default 0
+- location: varchar(100) - Storage location
+- isPerishable: boolean default false
+- expiryDate: timestamp
+- status: enum ['active', 'discontinued', 'out-of-stock'] default 'active'
+- createdAt: timestamp
+- updatedAt: timestamp
+
+Table: InventoryTransaction
+- id: uuid (primary key)
+- inventoryItemId: uuid (foreign key to InventoryItem)
+- type: enum ['purchase', 'usage', 'waste', 'adjustment', 'transfer']
+- quantity: numeric(10, 2)
+- unitCost: numeric(10, 2)
+- totalCost: numeric(10, 2)
+- previousStock: numeric(10, 2)
+- newStock: numeric(10, 2)
+- referenceType: varchar(50) - e.g., "purchase_order", "waste_log"
+- referenceId: uuid - ID of related record
+- performedBy: uuid (foreign key to Employee)
+- notes: text
+- createdAt: timestamp
+
+Table: InventoryCount
+- id: uuid (primary key)
+- countDate: timestamp
+- countType: enum ['daily', 'weekly', 'monthly', 'spot-check']
+- status: enum ['in-progress', 'completed', 'cancelled'] default 'in-progress'
+- performedBy: uuid (foreign key to Employee)
+- approvedBy: uuid (foreign key to Employee, nullable)
+- approvedAt: timestamp
+- notes: text
+- createdAt: timestamp
+- completedAt: timestamp
+
+Table: InventoryCountItem
+- id: uuid (primary key)
+- inventoryCountId: uuid (foreign key to InventoryCount)
+- inventoryItemId: uuid (foreign key to InventoryItem)
+- expectedQuantity: numeric(10, 2)
+- actualQuantity: numeric(10, 2)
+- variance: numeric(10, 2) - actualQuantity - expectedQuantity
+- varianceValue: numeric(10, 2) - variance * unitCost
+- notes: text
+- createdAt: timestamp
+
 IMPORTANT NOTES:
 - The Employee salary field is a string - you CANNOT use SQL functions like AVG() or SUM() on it
 - To work with salaries, query the raw data and process it in your code
@@ -120,14 +232,27 @@ IMPORTANT NOTES:
   - Table: "Employee" (not "employee")
   - Columns: firstName, lastName, hireDate (not firstname, lastname, hiredate)
   - Always use the EXACT case as shown in the schema above
-- When querying, use double quotes for table names: SELECT * FROM "Employee"
-- Column names don't need quotes unless they contain special characters
+- When querying, use double quotes for:
+  - ALL table names: SELECT * FROM "Employee"
+  - ALL camelCase column names: "inventoryItemId", "unitCost", "createdAt"
+  - PostgreSQL converts unquoted identifiers to lowercase, so camelCase MUST be quoted
+- Examples of proper quoting:
+  - CORRECT: it."inventoryItemId" = ii.id
+  - WRONG: it.inventoryItemId = ii.id (will fail - interpreted as inventoryitemid)
+  - CORRECT: SELECT "unitCost", "totalCost" FROM "InventoryTransaction"
+  - WRONG: SELECT unitCost, totalCost FROM "InventoryTransaction"
 - NEVER show raw JSON query results to users - always process and present data properly
 
-EXAMPLE QUERIES (note the exact case):
-- SELECT firstName, lastName, salary, hireDate FROM "Employee"
+EXAMPLE QUERIES (note the exact case and quoting):
+- SELECT "firstName", "lastName", salary, "hireDate" FROM "Employee"
 - SELECT * FROM "Employee" WHERE department = 'kitchen'
-- SELECT firstName, lastName, position FROM "Employee" WHERE status = 'active'
+- SELECT "firstName", "lastName", position FROM "Employee" WHERE status = 'active'
+- SELECT s.name, s.date, s."startTime", s."endTime" FROM "Shift" s WHERE s.status = 'scheduled'
+- SELECT e."firstName", e."lastName", sa.role, sa."checkInTime" FROM "ShiftAssignment" sa JOIN "Employee" e ON sa."employeeId" = e.id
+- SELECT * FROM "Supplier" WHERE status = 'active'
+- SELECT i.name, i."currentStock", i.unit, i.location FROM "InventoryItem" i WHERE i."currentStock" < i."minimumStock"
+- SELECT it.type, it.quantity, it."totalCost", e."firstName" FROM "InventoryTransaction" it JOIN "Employee" e ON it."performedBy" = e.id
+- SELECT ic.name, ic.description FROM "InventoryCategory" ic WHERE ic."parentCategoryId" IS NULL
 
 CALCULATING EXPERIENCE:
 To calculate years of experience from hireDate:
