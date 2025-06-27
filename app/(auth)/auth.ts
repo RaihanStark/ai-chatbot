@@ -66,6 +66,14 @@ export const {
       id: 'guest',
       credentials: {},
       async authorize() {
+        // Import is already at the top, so we can use it directly
+        const { entitlementsByUserType } = await import('@/lib/ai/entitlements');
+        
+        // Prevent guest login if guest access is disabled
+        if (!entitlementsByUserType.guest.enabled) {
+          return null;
+        }
+        
         const [guestUser] = await createGuestUser();
         return { ...guestUser, type: 'guest' };
       },

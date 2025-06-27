@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { getToken } from 'next-auth/jwt';
 import { guestRegex, isDevelopmentEnvironment } from './lib/constants';
+import { entitlementsByUserType } from './lib/ai/entitlements';
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -24,7 +25,17 @@ export async function middleware(request: NextRequest) {
   });
 
   if (!token) {
+    // Allow access to login and register pages when not authenticated
+    if (['/login', '/register'].includes(pathname)) {
+      return NextResponse.next();
+    }
+
     const redirectUrl = encodeURIComponent(request.url);
+
+    // Check if guest access is enabled
+    if (!entitlementsByUserType.guest.enabled) {
+      return NextResponse.redirect(new URL('/login', request.url));
+    }
 
     return NextResponse.redirect(
       new URL(`/api/auth/guest?redirectUrl=${redirectUrl}`, request.url),

@@ -84,6 +84,11 @@ export async function POST(request: Request) {
 
     const userType: UserType = session.user.type;
 
+    // Check if guest user is trying to access chat when guest access is disabled
+    if (userType === 'guest' && !entitlementsByUserType.guest.enabled) {
+      return new ChatSDKError('unauthorized:chat').toResponse();
+    }
+
     const messageCount = await getMessageCountByUserId({
       id: session.user.id,
       differenceInHours: 24,
