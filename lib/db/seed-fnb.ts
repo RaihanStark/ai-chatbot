@@ -601,7 +601,7 @@ async function seedDatabase() {
         type: 'purchase' as const,
         quantity: item.currentStock,
         unitCost: item.unitCost,
-        totalCost: (parseFloat(item.currentStock) * parseFloat(item.unitCost || '0')).toFixed(2),
+        totalCost: (Number.parseFloat(item.currentStock) * Number.parseFloat(item.unitCost || '0')).toFixed(2),
         previousStock: '0',
         newStock: item.currentStock,
         referenceType: 'initial_stock',
@@ -736,9 +736,9 @@ async function seedDatabase() {
       inventoryCountId: inventoryCountRecord.id,
       inventoryItemId: item.id,
       expectedQuantity: item.currentStock,
-      actualQuantity: (parseFloat(item.currentStock) * 0.95).toFixed(2), // 5% variance
-      variance: (parseFloat(item.currentStock) * -0.05).toFixed(2),
-      varianceValue: (parseFloat(item.currentStock) * -0.05 * parseFloat(item.unitCost || '0')).toFixed(2),
+      actualQuantity: (Number.parseFloat(item.currentStock) * 0.95).toFixed(2), // 5% variance
+      variance: (Number.parseFloat(item.currentStock) * -0.05).toFixed(2),
+      varianceValue: (Number.parseFloat(item.currentStock) * -0.05 * Number.parseFloat(item.unitCost || '0')).toFixed(2),
       notes: 'Minor variance due to usage'
     }));
     

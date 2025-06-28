@@ -3,9 +3,9 @@
 import type { Attachment, UIMessage } from 'ai';
 import { useChat } from '@ai-sdk/react';
 import { useEffect, useState } from 'react';
-import useSWR, { useSWRConfig } from 'swr';
+import { useSWRConfig } from 'swr';
 import { ChatHeader } from '@/components/chat-header';
-import { fetcher, fetchWithErrorHandlers, generateUUID } from '@/lib/utils';
+import { fetchWithErrorHandlers, generateUUID } from '@/lib/utils';
 import { Artifact } from './artifact';
 import { MultimodalInput } from './multimodal-input';
 import { Messages } from './messages';
@@ -17,6 +17,7 @@ import type { Session } from 'next-auth';
 import { useSearchParams } from 'next/navigation';
 import { useAutoResume } from '@/hooks/use-auto-resume';
 import { ChatSDKError } from '@/lib/errors';
+import { ChatGreeting } from './chat-greeting';
 
 export function Chat({
   id,
@@ -93,6 +94,7 @@ export function Chat({
 
   const [attachments, setAttachments] = useState<Array<Attachment>>([]);
   const isArtifactVisible = useArtifactSelector((state) => state.isVisible);
+  const [hasInteracted, setHasInteracted] = useState(false);
 
   useAutoResume({
     autoResume,
@@ -101,6 +103,31 @@ export function Chat({
     data,
     setMessages,
   });
+
+  const handleGreetingOptionSelect = (option: string) => {
+    setHasInteracted(true);
+    append({
+      role: 'user',
+      content: `I'd like help with ${option}`,
+    });
+  };
+
+  // Show greeting if no messages and no interaction yet
+  if (messages.length === 0 && !hasInteracted && !query) {
+    return (
+      <>
+        <div className="flex flex-col min-w-0 h-dvh bg-background">
+          <ChatHeader
+            chatId={id}
+            selectedModelId={initialChatModel}
+            isReadonly={isReadonly}
+            session={session}
+          />
+          <ChatGreeting onOptionSelect={handleGreetingOptionSelect} />
+        </div>
+      </>
+    );
+  }
 
   return (
     <>
