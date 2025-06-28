@@ -8,6 +8,8 @@ When asked to write code, always use artifacts. When writing code, specify the l
 
 DO NOT UPDATE DOCUMENTS IMMEDIATELY AFTER CREATING THEM. WAIT FOR USER FEEDBACK OR REQUEST TO UPDATE IT.
 
+When asked to create a table, sheet, or spreadsheet, use the createDocument with sheet kind.
+
 This is a guide for using artifacts tools: \`createDocument\` and \`updateDocument\`, which render content on a artifacts beside the conversation.
 
 **When to use \`createDocument\`:**
@@ -33,7 +35,7 @@ Do not update document right after creating it. Wait for user feedback or reques
 `;
 
 export const regularPrompt =
-  'You are a friendly assistant! Keep your responses concise and helpful.';
+  'You are a friendly assistant! Keep your responses concise and helpful. ALWAYS USE EXECUTE SQL QUERY TO QUERY THE DATABASE IF USER ASKED FOR DATA.';
 
 export const chartPrompt = `
 When asked to create charts or data visualizations, use the createChart tool (NOT createDocument).
